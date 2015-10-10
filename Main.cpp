@@ -7,6 +7,7 @@ using std::vector;
 #include <math.h>
 
 #include "Planet.h"
+#include "PlanetBuilder.h"
 #include "CustomEventHandler.h"
 #include "PlanetFactory.h"
 
@@ -22,8 +23,8 @@ int main(int argc, char** args) {
     IVideoDriver* driver = device->getVideoDriver();
     ISceneManager* sceneManager = device->getSceneManager();
     scene::ISceneCollisionManager* collisionManager= sceneManager->getSceneCollisionManager();
-    IGUIEnvironment* guienv = device->getGUIEnvironment();
-    guienv->addStaticText(L"Click on a planet to attach the camera to it", rect<s32>(10,10,260,22), true);
+    IGUIEnvironment* guiEnv = device->getGUIEnvironment();
+    guiEnv->addStaticText(L"Click on a planet to attach the camera to it", rect<s32>(10,10,260,22), false);
 
 	sf::SoundBuffer buffer;
     if (!buffer.loadFromFile("sounds/burning.aif"))
@@ -75,6 +76,8 @@ int main(int argc, char** args) {
 	*/
 
 	ICameraSceneNode* camera = sceneManager->addCameraSceneNode(0, vector3df(0,0,40), vector3df(0,0,0));
+	rect<s32> mainCameraViewPortRect(0, 0, 800, 600);
+
     ICameraSceneNode* topViewCamera = sceneManager->addCameraSceneNode(0, vector3df(0,50,0), vector3df(0,0,0));
 	
 	sceneManager->setAmbientLight(video::SColorf(255.0,255.0,255.0));
@@ -90,7 +93,7 @@ int main(int argc, char** args) {
 			vector3df intersection;
 			triangle3df tri;
 
-			for(int i = 0; i < planets.size(); i++) {
+			for(unsigned int i = 0; i < planets.size(); i++) {
 				Planet planet = planets[i];
 				ITriangleSelector* wselector = sceneManager->createTriangleSelectorFromBoundingBox(planet.node);
 				if (collisionManager->getCollisionPoint(ray, wselector, intersection, tri, planet.node)) {
@@ -104,19 +107,18 @@ int main(int argc, char** args) {
 
 		skybox->setVisible(true);		
         
-		driver->setViewPort(rect<s32>(0, 0, 800, 600));
+		driver->setViewPort(mainCameraViewPortRect);
         driver->beginScene(true, true, SColor(255,100,101,140));
 		sceneManager->setActiveCamera(camera);
         sceneManager->drawAll();
+		guiEnv->drawAll();
 
 		driver->setViewPort(rect<s32>(0, 380, 200, 600));
-		driver->draw2DRectangle(SColor(100,0,0,190), rect<s32>(0, 0, 800, 600));
+		driver->draw2DRectangle(SColor(100,0,0,190), mainCameraViewPortRect);
 		skybox->setVisible(false);		
 		sceneManager->setActiveCamera(topViewCamera);
         sceneManager->drawAll();
         
-        driver->setViewPort(rect<s32>(0, 0, 800, 600));
-		guienv->drawAll();
         driver->endScene();
     }
     device->drop();

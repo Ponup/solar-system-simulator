@@ -10,41 +10,37 @@ using std::vector;
 #include "PlanetBuilder.h"
 #include "CustomEventHandler.h"
 #include "PlanetFactory.h"
+#include "Path.h"
 
 using irr::video::SColor;
 using irr::gui::IGUIEnvironment;
 
-int main(int argc, char** args) {
+int main(int argc, char** argv) {
 	CustomEventReceiver receiver;
 	IrrlichtDevice *device = createDevice( video::EDT_OPENGL, dimension2d<u32>(800, 600), 16, false, false, false, &receiver);
 	if (!device)
 		return EXIT_FAILURE;
 	device->setWindowCaption(L"Solar System Simulator");
-    IVideoDriver* driver = device->getVideoDriver();
-    ISceneManager* sceneManager = device->getSceneManager();
-    scene::ISceneCollisionManager* collisionManager= sceneManager->getSceneCollisionManager();
-    IGUIEnvironment* guiEnv = device->getGUIEnvironment();
-    guiEnv->addStaticText(L"Click on a planet to attach the camera to it", rect<s32>(10,10,260,22), false);
+	IVideoDriver* driver = device->getVideoDriver();
+	ISceneManager* sceneManager = device->getSceneManager();
+	scene::ISceneCollisionManager* collisionManager= sceneManager->getSceneCollisionManager();
+	IGUIEnvironment* guiEnv = device->getGUIEnvironment();
+	guiEnv->addStaticText(L"Click on a planet to attach the camera to it", rect<s32>(10,10,260,22), false);
 
 	sf::SoundBuffer buffer;
-    if (!buffer.loadFromFile("sounds/burning.aif"))
-        return -1;
+	if (buffer.loadFromFile(currentPath() + "/sounds/burning.aif")) {
+		sf::Listener::setPosition(0, 0,0);
 
-	sf::Listener::setPosition(0, 0,0);
+		sf::Sound sound;
+		sound.setBuffer(buffer);
+		sound.setPosition(0, 0, 0);
+		sound.setLoop(true);
+		sound.play();
+	}
 
-	sf::Sound sound;
-	sound.setBuffer(buffer);
-	sound.setPosition(0, 0, 0);
-	sound.setLoop(true);
-	sound.play();
-
-	scene::ISceneNode* skybox=sceneManager->addSkyBoxSceneNode(
-        driver->getTexture("textures/space.jpg"),
-        driver->getTexture("textures/space.jpg"),
-        driver->getTexture("textures/space.jpg"),
-        driver->getTexture("textures/space.jpg"),
-        driver->getTexture("textures/space.jpg"),
-        driver->getTexture("textures/space.jpg"));
+	const char* spaceTexturePath = ( currentPath() + "/textures/space.jpg" ).c_str();
+	video::ITexture* space = driver->getTexture(spaceTexturePath);
+	scene::ISceneNode* skybox=sceneManager->addSkyBoxSceneNode(space, space, space, space, space, space);
 
 	sceneManager->addLightSceneNode(0, vector3df(0, 0, -50),  video::SColorf(1.0f, 1.0f, 1.0f), 50.0f, 1001);
 
@@ -56,9 +52,7 @@ int main(int argc, char** args) {
 	Planet uranus = planetFactory.create(PlanetId::Uranus);
 	Planet neptune = planetFactory.create(PlanetId::Neptune);
 
-	vector<Planet> planets;
-	planets.push_back(sun);
-	planets.push_back(planetFactory.create(PlanetId::Mercury));
+	vector<Planet> planets = { sun, planetFactory.create(PlanetId::Mercury) };
 	planets.push_back(planetFactory.create(PlanetId::Venus));
 	planets.push_back(earth);
 	planets.push_back(planetFactory.create(PlanetId::Mars));
@@ -68,23 +62,16 @@ int main(int argc, char** args) {
 	planets.push_back(neptune);
 	planets.push_back(pluto);
 
-	/*
-	pluto->getMaterial(0).SpecularColor.set(255,255,255,255);
-	pluto->getMaterial(0).AmbientColor.set(255,255,255,255); 
-	pluto->getMaterial(0).DiffuseColor.set(255,255,255,255); 
-	pluto->getMaterial(0).EmissiveColor.set(0,0,0,0);
-	*/
-
 	ICameraSceneNode* camera = sceneManager->addCameraSceneNode(0, vector3df(0,0,40), vector3df(0,0,0));
 	rect<s32> mainCameraViewPortRect(0, 0, 800, 600);
 
-    ICameraSceneNode* topViewCamera = sceneManager->addCameraSceneNode(0, vector3df(0,50,0), vector3df(0,0,0));
+	ICameraSceneNode* topViewCamera = sceneManager->addCameraSceneNode(0, vector3df(0,50,0), vector3df(0,0,0));
 	
 	sceneManager->setAmbientLight(video::SColorf(255.0,255.0,255.0));
 
 	ISceneNode* selectedNode = sun.node;
 	line3df ray;
-    while(device->run()) {
+	while(device->run()) {
 
 		if(receiver.GetMouseState().LeftButtonDown) {
 			position2di mousepos = receiver.GetMouseState().Position;
@@ -108,22 +95,22 @@ int main(int argc, char** args) {
 		skybox->setVisible(true);		
         
 		driver->setViewPort(mainCameraViewPortRect);
-        driver->beginScene(true, true, SColor(255,100,101,140));
+		driver->beginScene(true, true, SColor(255,100,101,140));
 		sceneManager->setActiveCamera(camera);
-        sceneManager->drawAll();
+		sceneManager->drawAll();
 		guiEnv->drawAll();
 
 		driver->setViewPort(rect<s32>(0, 380, 200, 600));
 		driver->draw2DRectangle(SColor(100,0,0,190), mainCameraViewPortRect);
 		skybox->setVisible(false);		
 		sceneManager->setActiveCamera(topViewCamera);
-        sceneManager->drawAll();
-        
-        driver->endScene();
-    }
-    device->drop();
+		sceneManager->drawAll();
+		
+		driver->endScene();
+	}
+	device->drop();
 
-    return EXIT_SUCCESS;
+	return EXIT_SUCCESS;
 }
 
 

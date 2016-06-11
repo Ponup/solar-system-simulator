@@ -32,9 +32,7 @@ public:
 
 	Planet() : flySpeed(.001f), lighting(true) {}
 	~Planet() {
-		if(node != nullptr) {
-			// @todo after fixing memory ownership on node  node->drop();
-		}
+        // node should not be deleted. Memory managed by irrlicht.
 	}
 };
 

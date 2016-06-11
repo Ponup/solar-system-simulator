@@ -18,8 +18,9 @@ using irr::gui::IGUIEnvironment;
 int main(int argc, char** argv) {
 	CustomEventReceiver receiver;
 	IrrlichtDevice *device = createDevice( video::EDT_OPENGL, dimension2d<u32>(800, 600), 16, false, false, false, &receiver);
-	if (!device)
+	if (!device) {
 		return EXIT_FAILURE;
+    }
 	device->setWindowCaption(L"Solar System Simulator");
 	IVideoDriver* driver = device->getVideoDriver();
 	ISceneManager* sceneManager = device->getSceneManager();
@@ -40,7 +41,7 @@ int main(int argc, char** argv) {
 
 	const char* spaceTexturePath = ( currentPath() + "/textures/space.jpg" ).c_str();
 	video::ITexture* space = driver->getTexture(spaceTexturePath);
-	scene::ISceneNode* skybox=sceneManager->addSkyBoxSceneNode(space, space, space, space, space, space);
+	scene::ISceneNode* skybox = sceneManager->addSkyBoxSceneNode(space, space, space, space, space, space);
 
 	sceneManager->addLightSceneNode(0, vector3df(0, 0, -50),  video::SColorf(1.0f, 1.0f, 1.0f), 50.0f, 1001);
 
@@ -70,18 +71,16 @@ int main(int argc, char** argv) {
 	sceneManager->setAmbientLight(video::SColorf(255.0,255.0,255.0));
 
 	ISceneNode* selectedNode = sun.node;
-	line3df ray;
 	while(device->run()) {
 
 		if(receiver.GetMouseState().LeftButtonDown) {
 			position2di mousepos = receiver.GetMouseState().Position;
-			ray = sceneManager->getSceneCollisionManager()->getRayFromScreenCoordinates( mousepos, camera);
+			line3df ray = sceneManager->getSceneCollisionManager()->getRayFromScreenCoordinates( mousepos, camera);
 
 			vector3df intersection;
 			triangle3df tri;
 
-			for(unsigned int i = 0; i < planets.size(); i++) {
-				Planet planet = planets[i];
+            for(Planet& planet : planets) {
 				ITriangleSelector* wselector = sceneManager->createTriangleSelectorFromBoundingBox(planet.node);
 				if (collisionManager->getCollisionPoint(ray, wselector, intersection, tri, planet.node)) {
 					selectedNode = planet.node;

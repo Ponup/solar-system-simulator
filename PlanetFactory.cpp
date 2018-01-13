@@ -92,7 +92,8 @@ Planet PlanetFactory::create(PlanetId planetId) {
 				.build(sceneManager, driver);
 			break;
 
-
+		default:
+			break;
 	}
 	return planet;
 }

@@ -15,6 +15,9 @@ bool CustomEventReceiver::OnEvent(const SEvent& event) {
                 MouseState.Position.X = event.MouseInput.X;
                 MouseState.Position.Y = event.MouseInput.Y;
                 break;
+
+            default:
+            	break;
             }
         }
         return false;

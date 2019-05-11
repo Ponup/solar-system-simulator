@@ -29,10 +29,10 @@ int main(int argc, char** argv) {
 	guiEnv->addStaticText(L"Click on a planet to attach the camera to it", rect<s32>(10,10,260,22), false);
 
 	sf::SoundBuffer buffer;
-	if (buffer.loadFromFile(currentPath() + "/sounds/burning.aif")) {
-		sf::Listener::setPosition(0, 0,0);
+	sf::Sound sound;
+	if (buffer.loadFromFile(currentPath() + "/sounds/burning.wav")) {
+		sf::Listener::setPosition(0, 0, 0);
 
-		sf::Sound sound;
 		sound.setBuffer(buffer);
 		sound.setPosition(0, 0, 0);
 		sound.setLoop(true);

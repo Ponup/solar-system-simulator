@@ -2,9 +2,9 @@
 UNAME:=$(shell uname -s)
 
 CC=c++
-CCFLAGS=-std=c++14 -g -Wall -pedantic -Wno-nested-anon-types  -I/usr/local/Cellar/irrlicht/1.8.1/include -I/usr/local/Cellar/sfml/2.3_1/include
+CCFLAGS=-std=c++17 -g -Wall -pedantic -Wno-nested-anon-types
 
-LIBS=-lIrrlicht -lsfml-audio 
+LIBS=-lIrrlicht -lsfml-audio -lsfml-system
 ifeq ($(UNAME),Darwin)
 LIBS+=-framework OpenGL -framework Cocoa -framework IOKit
 endif
@@ -14,7 +14,7 @@ SRCS=CustomEventHandler.cpp PlanetBuilder.cpp PlanetFactory.cpp Path.cpp Main.cp
 OBJS=$(subst .cpp,.o,$(SRCS))
 
 $(TARGET): $(OBJS) 
-	$(CC) $(LIBS) $(OBJS) -o $@
+	$(CC) $(OBJS) $(LIBS) -o $@
 
 %.o: %.cpp
 	$(CC) $(CCFLAGS) -c $<
